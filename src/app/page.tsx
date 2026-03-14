@@ -1,8 +1,11 @@
+'use client';
+
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SermonCard from '@/components/SermonCard';
 import BookCard from '@/components/BookCard';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -40,16 +43,35 @@ export default function Home() {
               <span className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">Conference Speaker</span>
             </div>
           </div>
-          
+
           <div className="hidden md:block">
-            <div className="rounded-[14px] overflow-hidden aspect-[3/4] bg-gradient-to-br from-[#1c2b0a] via-[#2a3c11] to-[#171e09] border border-lime/20 flex flex-col items-center justify-between relative">
-              <div className="flex-1 flex flex-col items-center justify-center gap-[10px]">
-                <div className="w-[72px] h-[72px] rounded-full bg-lime/10 border-2 border-lime/20 flex items-center justify-center text-[30px]">
-                  <i className="ph ph-user text-lime/80 text-4xl"></i>
-                </div>
-                <span className="text-[11px] text-white/25">Pastor Photo</span>
+            <div className="rounded-[14px] overflow-hidden aspect-[3/4] bg-[#2a3c11] border border-lime/20 flex flex-col justify-end relative">
+              {/* Pastor Portrait Image */}
+              <div className="absolute inset-0 w-full h-full">
+                <Image
+                  src="/rev-ebenezer-ocran.jpeg"
+                  alt="Pastor Ebenezer Ocran"
+                  fill
+                  className="object-cover object-top"
+                  // Fallback to placeholder if image is missing
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.classList.add('flex', 'items-center', 'justify-center', 'bg-gradient-to-br', 'from-[#1c2b0a]', 'via-[#2a3c11]', 'to-[#171e09]');
+                    target.parentElement!.innerHTML = `
+                      <div class="flex-1 flex flex-col items-center justify-center gap-[10px] w-full h-full pb-16">
+                        <div class="w-[72px] h-[72px] rounded-full bg-lime/10 border-2 border-lime/20 flex items-center justify-center text-[30px]">
+                          <i class="ph ph-user text-lime/80 text-4xl"></i>
+                        </div>
+                        <span class="text-[11px] text-white/25">Add /pastor-portrait.jpg to public folder</span>
+                      </div>
+                    `;
+                  }}
+                />
               </div>
-              <div className="w-full grid grid-cols-3 bg-lime/5 border-t border-lime/10">
+
+              {/* Stats Overlay at bottom */}
+              <div className="w-full grid grid-cols-3 bg-[#111111]/80 backdrop-blur-md border-t border-lime/10 relative z-10">
                 <div className="p-4 text-center border-r border-lime/10">
                   <div className="font-serif text-[22px] font-bold text-lime leading-none">10+</div>
                   <div className="text-[10px] text-white/35 mt-[3px] tracking-[0.06em] uppercase font-medium">Years Ministry</div>

@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="bg-dark pt-[52px] pb-[22px]">
       <div className="max-w-[1200px] mx-auto px-8">
-        
+
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-9 pb-11 border-b border-white/5">
           <div>
             <div className="font-serif text-[18px] font-bold text-white mb-1">Rev. Ebenezer Ocran</div>
@@ -13,21 +13,21 @@ export default function Footer() {
               Senior Pastor of ICGC NewLife Temple, Oyibi–Ghana. Committed to proclaiming the truth of God&apos;s Word and building lives that glorify Christ.
             </p>
             <div className="flex gap-[7px]">
-              <a href="#" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
                 <i className="ph ph-facebook-logo"></i>
               </a>
-              <a href="#" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
                 <i className="ph ph-instagram-logo"></i>
               </a>
-              <a href="#" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
                 <i className="ph ph-linkedin-logo"></i>
               </a>
-              <a href="#" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
+              <a href="https://icgcnltmedia.podbean.com/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-md bg-white/5 border border-white/10 text-[16px] font-bold text-white/50 transition-colors duration-150 hover:bg-lime/10 hover:border-lime/30 hover:text-lime">
                 <i className="ph ph-microphone-stage"></i>
               </a>
             </div>
           </div>
-          
+
           <div>
             <div className="text-[10.5px] font-bold text-white/45 tracking-[0.12em] uppercase mb-[14px]">Ministry</div>
             <div className="flex flex-col gap-[7px]">
@@ -36,7 +36,7 @@ export default function Footer() {
               <Link href="/ministry" className="text-[13px] text-white/40 font-light text-left transition-colors duration-150 hover:text-lime">Ministry Focus</Link>
             </div>
           </div>
-          
+
           <div>
             <div className="text-[10.5px] font-bold text-white/45 tracking-[0.12em] uppercase mb-[14px]">Resources</div>
             <div className="flex flex-col gap-[7px]">
@@ -45,7 +45,7 @@ export default function Footer() {
               <Link href="/sermons" className="text-[13px] text-white/40 font-light text-left transition-colors duration-150 hover:text-lime">Sermon Notes</Link>
             </div>
           </div>
-          
+
           <div>
             <div className="text-[10.5px] font-bold text-white/45 tracking-[0.12em] uppercase mb-[14px]">Connect</div>
             <div className="flex flex-col gap-[7px]">
@@ -56,7 +56,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        
+
         <div className="pt-[22px] flex justify-between items-center flex-wrap gap-2.5">
           <span className="text-[11.5px] text-white/25 font-light">© 2026 Rev. Ebenezer Ocran. All Rights Reserved.</span>
           <div className="flex gap-[14px]">
@@ -64,7 +64,7 @@ export default function Footer() {
             <Link href="#" className="text-[11.5px] text-white/25 font-light transition-colors hover:text-white/50">Terms</Link>
           </div>
         </div>
-        
+
       </div>
     </footer>
   );
