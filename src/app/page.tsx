@@ -135,8 +135,13 @@ export default function Home() {
       {/* ABOUT STRIP */}
       <div className="bg-g50 py-[68px]">
         <div className="max-w-[1200px] mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-[60px] items-start">
-          <div className="bg-g100 rounded-[12px] aspect-[4/3] flex items-center justify-center text-[52px] border border-lime/20 text-lime-dk/50">
-            <i className="ph ph-book-open"></i>
+          <div className="bg-g100 rounded-[12px] aspect-[9/16] border border-lime/20 overflow-hidden relative">
+            <Image
+              src="/rev-ebenezer-ocran-life-II.jpeg"
+              alt="Rev. Ebenezer Ocran"
+              fill
+              className="object-cover"
+            />
           </div>
           <div>
             <div className="text-[11px] font-bold text-lime-dk tracking-[0.14em] uppercase mb-[10px]">About the Pastor</div>
