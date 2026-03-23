@@ -77,7 +77,7 @@ export default function Home() {
                   <div className="text-[10px] text-white/35 mt-[3px] tracking-[0.06em] uppercase font-medium">Years Ministry</div>
                 </div>
                 <div className="p-4 text-center border-r border-lime/10">
-                  <div className="font-serif text-[22px] font-bold text-lime leading-none">7</div>
+                  <div className="font-serif text-[22px] font-bold text-lime leading-none">6</div>
                   <div className="text-[10px] text-white/35 mt-[3px] tracking-[0.06em] uppercase font-medium">Books</div>
                 </div>
                 <div className="p-4 text-center">
