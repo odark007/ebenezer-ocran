@@ -1,7 +1,13 @@
+// src/app/layout.tsx
+
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+// --- ADD THESE IMPORTS ---
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer"; 
+
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
@@ -26,10 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-          <Script src="https://unpkg.com/@phosphor-icons/web" strategy="beforeInteractive" />
+          <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
       </head>
-      <body className={`${playfairDisplay.variable} ${dmSans.variable} antialiased`}>
+      {/* We already established Phase 3. Let's make sure the suppressedHydrationWarning is present as discussed previously */}
+      <body className={`${playfairDisplay.variable} ${dmSans.variable} antialiased`} suppressHydrationWarning>
+        <Navbar /> {/* Now this is defined */}
         {children}
+        <Footer /> {/* Now this is defined */}
       </body>
     </html>
   );

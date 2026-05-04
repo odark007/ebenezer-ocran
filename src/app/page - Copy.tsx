@@ -1,39 +1,16 @@
-import { createClient } from '@/utils/supabase/server';
+'use client';
+
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import SermonCard from '@/components/SermonCard';
 import BookCard from '@/components/BookCard';
 import Link from 'next/link';
 import Image from 'next/image';
-import FeaturedSermonPlayer from '@/components/FeaturedSermonPlayer';
 
-export default async function Home() {
-  const supabase = await createClient();
-
-  // Featured sermon
-  const { data: featuredSermon } = await supabase
-    .from('sermons')
-    .select('*, sermon_series(name)')
-    .eq('is_featured', true)
-    .eq('status', 'published')
-    .single();
-
-  // Last 3 published sermons
-  const { data: recentSermons } = await supabase
-    .from('sermons')
-    .select('*, sermon_series(name)')
-    .eq('status', 'published')
-    .order('created_at', { ascending: false })
-    .limit(3);
-
-  // Published books
-  const { data: books } = await supabase
-    .from('books')
-    .select('*')
-    .eq('status', 'published')
-    .order('display_order', { ascending: true })
-    .limit(4);
-
+export default function Home() {
   return (
     <div className="min-h-screen flex flex-col pt-[68px]">
+      <Navbar />
 
       {/* HERO SECTION */}
       <section className="min-h-screen flex flex-col justify-center bg-dark relative overflow-hidden flex-1">
@@ -59,22 +36,41 @@ export default async function Home() {
               </Link>
             </div>
             <div className="flex flex-wrap gap-[7px]">
-              {['Pastor', 'Teacher', 'Leadership Mentor', 'Author', 'Conference Speaker'].map((tag) => (
-                <span key={tag} className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">{tag}</span>
-              ))}
+              <span className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">Pastor</span>
+              <span className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">Teacher</span>
+              <span className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">Leadership Mentor</span>
+              <span className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">Author</span>
+              <span className="text-[11.5px] font-medium text-white/45 bg-white/5 border border-white/10 px-[12px] py-[4px] rounded-full tracking-[0.03em]">Conference Speaker</span>
             </div>
           </div>
 
           <div className="hidden md:block">
             <div className="rounded-[14px] overflow-hidden aspect-[3/4] bg-[#2a3c11] border border-lime/20 flex flex-col justify-end relative">
+              {/* Pastor Portrait Image */}
               <div className="absolute inset-0 w-full h-full">
                 <Image
                   src="/rev-ebenezer-ocran.jpeg"
                   alt="Pastor Ebenezer Ocran"
                   fill
                   className="object-cover object-top"
+                  // Fallback to placeholder if image is missing
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.classList.add('flex', 'items-center', 'justify-center', 'bg-gradient-to-br', 'from-[#1c2b0a]', 'via-[#2a3c11]', 'to-[#171e09]');
+                    target.parentElement!.innerHTML = `
+                      <div class="flex-1 flex flex-col items-center justify-center gap-[10px] w-full h-full pb-16">
+                        <div class="w-[72px] h-[72px] rounded-full bg-lime/10 border-2 border-lime/20 flex items-center justify-center text-[30px]">
+                          <i class="ph ph-user text-lime/80 text-4xl"></i>
+                        </div>
+                        <span class="text-[11px] text-white/25">Add /pastor-portrait.jpg to public folder</span>
+                      </div>
+                    `;
+                  }}
                 />
               </div>
+
+              {/* Stats Overlay at bottom */}
               <div className="w-full grid grid-cols-3 bg-[#111111]/80 backdrop-blur-md border-t border-lime/10 relative z-10">
                 <div className="p-4 text-center border-r border-lime/10">
                   <div className="font-serif text-[22px] font-bold text-lime leading-none">10+</div>
@@ -97,49 +93,41 @@ export default async function Home() {
       {/* FEATURED SERMON */}
       <div className="bg-dark py-[68px]">
         <div className="max-w-[1200px] mx-auto px-8 grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-[56px] items-center">
-          <FeaturedSermonPlayer sermon={featuredSermon} />
+          <div className="hidden md:block bg-lime/5 border border-lime/15 rounded-[14px] overflow-hidden">
+            <div className="bg-black/40 p-[24px] flex items-center gap-[18px]">
+              <div className="w-[52px] h-[52px] bg-lime rounded-full flex items-center justify-center cursor-pointer shrink-0">
+                <div className="w-0 h-0 border-solid border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[17px] border-l-black ml-1"></div>
+              </div>
+              <div>
+                <div className="font-serif text-[15px] font-semibold text-white mb-[3px]">The Heart of the Shepherd</div>
+                <div className="text-[12px] text-lime font-medium">Servant Leadership Series</div>
+              </div>
+            </div>
+            <div className="bg-white px-[24px] py-[14px] flex items-center gap-[12px]">
+              <span className="text-[11px] text-[#999] font-medium">08:22</span>
+              <div className="flex-1 h-1 bg-g100 rounded-full overflow-hidden cursor-pointer">
+                <div className="w-[32%] h-full bg-lime-dk rounded-full"></div>
+              </div>
+              <span className="text-[11px] text-[#999] font-medium">44:15</span>
+            </div>
+          </div>
           <div>
             <div className="text-[11px] font-bold text-lime tracking-[0.14em] uppercase mb-[10px]">Latest Sermon</div>
-            {featuredSermon ? (
-              <>
-                <h2 className="font-serif text-[30px] font-bold text-white leading-[1.2] mb-[14px]">
-                  {featuredSermon.title}
-                </h2>
-                {featuredSermon.scripture_ref && (
-                  <p className="text-[13.5px] text-white/45 italic border-l-2 border-lime pl-[11px] mb-[18px] leading-[1.6]">
-                    "{featuredSermon.scripture_ref}"
-                  </p>
-                )}
-                {featuredSermon.description && (
-                  <p className="text-[14.5px] text-white/50 leading-[1.75] font-light mb-[26px]">
-                    {featuredSermon.description}
-                  </p>
-                )}
-                <div className="flex gap-[11px] flex-wrap">
-                  <Link href="/sermons" className="text-[13px] font-semibold bg-lime text-black px-[20px] py-[10px] rounded-[7px] hover:bg-lime-dk transition-colors">
-                    Full Sermon Library
-                  </Link>
-                  {featuredSermon.notes_url && (
-                    <a href={featuredSermon.notes_url} target="_blank" rel="noopener noreferrer"
-                      className="text-[13px] font-semibold bg-white/10 text-white border border-white/20 px-[20px] py-[10px] rounded-[7px] hover:bg-white/15 transition-colors no-underline">
-                      Download Notes
-                    </a>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div>
-                <h2 className="font-serif text-[30px] font-bold text-white leading-[1.2] mb-[14px]">
-                  Sermons & Teachings
-                </h2>
-                <p className="text-[14.5px] text-white/50 leading-[1.75] font-light mb-[26px]">
-                  Life-changing messages to grow your faith and strengthen your walk with God.
-                </p>
-                <Link href="/sermons" className="text-[13px] font-semibold bg-lime text-black px-[20px] py-[10px] rounded-[7px] hover:bg-lime-dk transition-colors">
-                  Full Sermon Library
-                </Link>
-              </div>
-            )}
+            <h2 className="font-serif text-[30px] font-bold text-white leading-[1.2] mb-[14px]">The Heart of<br />the Shepherd</h2>
+            <p className="text-[13.5px] text-white/45 italic border-l-2 border-lime pl-[11px] mb-[18px] leading-[1.6]">
+              "The good shepherd lays down his life for the sheep." — John 10:11
+            </p>
+            <p className="text-[14.5px] text-white/50 leading-[1.75] font-light mb-[26px]">
+              A powerful teaching on servant leadership and Christ-centered shepherding — what it means to lead not from position, but from genuine love for God&apos;s people.
+            </p>
+            <div className="flex gap-[11px] flex-wrap">
+              <Link href="/sermons" className="font-sans text-[13px] font-semibold bg-lime text-black px-[22px] py-[11px] rounded-[7px] cursor-pointer transition-all duration-200 hover:bg-lime-dk">
+                Full Sermon Library
+              </Link>
+              <button className="font-sans text-[13px] font-medium bg-transparent text-white/60 border border-white/15 px-[22px] py-[11px] rounded-[7px] cursor-pointer transition-all duration-200 hover:border-lime hover:text-lime">
+                Download Notes
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -148,7 +136,12 @@ export default async function Home() {
       <div className="bg-g50 py-[68px]">
         <div className="max-w-[1200px] mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-[60px] items-start">
           <div className="bg-g100 rounded-[12px] aspect-[9/16] border border-lime/20 overflow-hidden relative">
-            <Image src="/rev-ebenezer-ocran-life-II.jpeg" alt="Rev. Ebenezer Ocran" fill className="object-cover" />
+            <Image
+              src="/rev-ebenezer-ocran-life-II.jpeg"
+              alt="Rev. Ebenezer Ocran"
+              fill
+              className="object-cover"
+            />
           </div>
           <div>
             <div className="text-[11px] font-bold text-lime-dk tracking-[0.14em] uppercase mb-[10px]">About the Pastor</div>
@@ -160,7 +153,7 @@ export default async function Home() {
               He is widely known for practical, Bible-based teaching that effectively bridges scriptural truth and everyday living. His passion is to help believers discover their Kingdom identity and walk in the fullness of God&apos;s purpose.
             </p>
             <p className="text-[15.5px] text-g700 leading-[1.75] mb-[16px] font-light">
-              Beyond the pulpit, he is a trained accountant with many years of professional working experience. He is happily married to <strong>Lady Grace Ocran</strong>, and they are blessed with four daughters.
+              Beyond the pulpit, he is a trained accountant with many years of professional working experience — successfully combining ministry with corporate and financial practice. He is happily married to <strong>Lady Grace Ocran</strong>, and they are blessed with four daughters.
             </p>
             <div className="flex flex-wrap gap-[8px] my-[18px] mb-[24px]">
               {['Expository Preaching', 'Leadership Development', 'Published Author (7 books)', 'Conference Speaker', 'Chartered Accountant'].map((pillar, i) => (
@@ -189,28 +182,21 @@ export default async function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-[22px]">
-            {recentSermons && recentSermons.length > 0 ? (
-              recentSermons.map((s) => (
-                <SermonCard
-                  key={s.id}
-                  type={s.type}
-                  series={s.sermon_series?.name || ''}
-                  title={s.title}
-                  scripture_ref={s.scripture_ref}
-                  description={s.description}
-                  youtube_url={s.youtube_url}
-                  notes_url={s.notes_url}
-                  podbean_url={s.podbean_url}
-                />
-              ))
-            ) : (
-              // Fallback placeholders when no sermons in DB yet
-              <>
-                <SermonCard type="Video" series="Servant Leadership" title="The Heart of the Shepherd" script="John 10:11" desc="A powerful teaching on servant leadership and Christ-centered shepherding." />
-                <SermonCard type="Series" series="Spiritual Growth" title="Becoming an Extraordinary Christian" script="2 Peter 1:3–4" desc="A transformational series focused on spiritual discipline, conviction, and growth." />
-                <SermonCard type="Teaching" series="Holy Spirit" title="The Ministry of the Holy Spirit" script="John 16:13" desc="An in-depth teaching on the work and activation of the Holy Spirit in believers." />
-              </>
-            )}
+            <SermonCard
+              type="Video" series="Servant Leadership" title="The Heart of the Shepherd"
+              desc="A powerful teaching on servant leadership and Christ-centered shepherding."
+              date="Recent" script="John 10:11"
+            />
+            <SermonCard
+              type="Series" series="Spiritual Growth" title="Becoming an Extraordinary Christian"
+              desc="A transformational series focused on spiritual discipline, conviction, and growth."
+              date="Ongoing" script="2 Peter 1:3–4"
+            />
+            <SermonCard
+              type="Teaching" series="Holy Spirit" title="The Ministry of the Holy Spirit"
+              desc="An in-depth teaching on the work and activation of the Holy Spirit in believers."
+              date="Recent" script="John 16:13"
+            />
           </div>
         </div>
       </div>
@@ -228,23 +214,15 @@ export default async function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-[28px]">
-            {books && books.length > 0 ? (
-              books.map((b) => (
-                <BookCard key={b.id} title={b.title} blurb={b.blurb} color={b.color || '#1a2d0a'} badge={b.badge} />
-              ))
-            ) : (
-              <>
-                <BookCard title="Becoming an Extraordinary Christian" color="#1a2d0a" badge="Featured" />
-                <BookCard title="The Leadership Mandate" color="#0d1f2d" />
-                <BookCard title="Praying with Authority" color="#2d1a0a" />
-                <BookCard title="Covenant Living" color="#1a0d2d" badge="New" />
-              </>
-            )}
+            <BookCard title="Becoming an Extraordinary Christian" color="#1a2d0a" badge="Featured" />
+            <BookCard title="The Leadership Mandate" color="#0d1f2d" />
+            <BookCard title="Praying with Authority" color="#2d1a0a" />
+            <BookCard title="Covenant Living" color="#1a0d2d" badge="New" />
           </div>
         </div>
       </div>
 
-      {/* PRAYER BANNER */}
+      {/* PRAYER BANNER & NEWSLETTER */}
       <div className="bg-lime py-[52px] text-center px-8">
         <div className="max-w-[520px] mx-auto">
           <h2 className="font-serif text-[26px] font-bold text-black mb-[7px]">Share Your Prayer Request</h2>
@@ -254,8 +232,6 @@ export default async function Home() {
           </Link>
         </div>
       </div>
-
-      {/* NEWSLETTER */}
       <div className="bg-g50 py-[52px] border-t border-g100">
         <div className="max-w-[560px] mx-auto px-8 text-center">
           <h2 className="font-serif text-[24px] font-bold text-black mb-[7px]">Stay Connected</h2>
@@ -267,6 +243,7 @@ export default async function Home() {
         </div>
       </div>
 
+      <Footer />
     </div>
   );
 }

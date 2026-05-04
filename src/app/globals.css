@@ -29,3 +29,34 @@
     @apply font-sans bg-g50 text-charcoal antialiased;
   }
 }
+
+/* src/app/globals.css (Add at the end) */
+
+/* AdminBookForm - Tag Input Styling */
+.react-tags__tagInput {
+    position: relative;
+    z-index: 10;
+}
+
+.react-tags__suggestions {
+    width: 100%;
+    min-width: 200px;
+}
+
+.react-tags__suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.react-tags__suggestions li {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: #111;
+}
+
+.react-tags__suggestions li.react-tags__activeSuggestion {
+    background-color: #f0fcd4; /* Lime pale */
+    color: #111;
+}
