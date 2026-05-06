@@ -227,10 +227,42 @@ export default async function Home() {
               All Books →
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-[28px]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-[28px]">
             {books && books.length > 0 ? (
               books.map((b) => (
-                <BookCard key={b.id} title={b.title} blurb={b.blurb} color={b.color || '#1a2d0a'} badge={b.badge} />
+                <a key={b.id} href={`/books/${b.slug}`} className="no-underline group cursor-pointer">
+                  <div className="transition-transform duration-200 group-hover:-translate-y-1">
+                    <div className="rounded-lg overflow-hidden aspect-[9/16] relative shadow-[0_8px_28px_rgba(0,0,0,0.12)] mb-[12px]">
+                      {b.cover_image_url ? (
+                        <img
+                          src={b.cover_image_url}
+                          alt={b.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0 flex flex-col justify-end p-4"
+                          style={{ background: `linear-gradient(160deg, ${b.color || '#1a2d0a'} 0%, #111 100%)` }}
+                        >
+                          <div className="absolute left-0 top-0 bottom-0 w-[5px] bg-lime/40"></div>
+                          <div className="font-serif text-[14px] font-bold text-white leading-[1.2] relative z-10">{b.title}</div>
+                          <div className="text-[9px] text-white/40 uppercase tracking-[0.08em] mt-1 relative z-10">Rev. Ebenezer Ocran</div>
+                        </div>
+                      )}
+                      {b.badge && (
+                        <div className="absolute top-[10px] right-[10px] bg-lime text-black text-[9px] font-bold px-[7px] py-[3px] rounded-[3px] tracking-[0.08em] uppercase z-10">
+                          {b.badge}
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                        <span className="bg-lime text-black text-[11px] font-bold px-[12px] py-[6px] rounded-full">Learn More</span>
+                      </div>
+                    </div>
+                    <div className="font-serif text-[14px] font-semibold text-black leading-[1.3] group-hover:text-lime-dk transition-colors">
+                      {b.title}
+                    </div>
+                  </div>
+                </a>
               ))
             ) : (
               <>

@@ -3,114 +3,144 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { v4 as uuidv4 } from 'uuid'; // Requires 'npm i uuid @types/uuid'
+import { v4 as uuidv4 } from 'uuid';
 
 const BUCKET_NAME = 'books';
 const PUBLIC_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/`;
 
-// 1. Core Action: Add or Edit a Book entry
-export async function upsertBook(prevState: any, formData: FormData) {
+// ── AUTH HELPER ──────────────────────────────────────────────────────────────
+async function requireAuth() {
   const supabase = await createClient();
-
-  // (Server-side Auth Check)
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    throw new Error('Unauthorized.');
-  }
+  if (!user) throw new Error('Unauthorized.');
+  return supabase;
+}
 
-  // Extract fields
-  const id = formData.get('id') as string || uuidv4();
+// ── HELPER: Delete image from storage safely ─────────────────────────────────
+async function deleteImageFromStorage(supabase: any, imageUrl: string | null) {
+  if (!imageUrl || !imageUrl.startsWith(PUBLIC_BASE_URL)) return;
+  const filePath = imageUrl.replace(PUBLIC_BASE_URL, '');
+  await supabase.storage.from(BUCKET_NAME).remove([filePath]);
+}
+
+// ── BOOK ACTIONS ─────────────────────────────────────────────────────────────
+
+export async function upsertBook(prevState: any, formData: FormData) {
+  const supabase = await requireAuth();
+
+  const id = (formData.get('id') as string) || uuidv4();
   const title = formData.get('title') as string;
-  const slug = formData.get('slug') as string || title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+  const slug = (formData.get('slug') as string) ||
+    title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
   const amazon_url = formData.get('amazonUrl') as string;
-  const portrait_file = formData.get('portrait') as File;
-  const badge = formData.get('badge') as string;
+  const blurb = (formData.get('blurb') as string) || null;
+  const full_description = (formData.get('fullDescription') as string) || null;
+  const topic_id = (formData.get('topicId') as string) || null;
+  const badge = (formData.get('badge') as string) || null;
   const display_order = parseInt(formData.get('displayOrder') as string) || 0;
-  const status = formData.get('status') as 'published' | 'draft';
-  const old_image_url = formData.get('oldImageUrl') as string;
+  const status = formData.get('status') as string;
+  const is_featured = formData.get('isFeatured') === 'true';
+  const old_image_url = (formData.get('oldImageUrl') as string) || null;
+  const related_book_ids_raw = (formData.get('relatedBookIds') as string) || '[]';
+  const related_book_ids = JSON.parse(related_book_ids_raw);
 
-  let final_image_url = old_image_url;
-  let portrait_changed = false;
+  const cover_file = formData.get('portrait') as File;
+  let cover_image_url = old_image_url;
+  let new_image_uploaded = false;
 
-  // -- 1a. Process Portrait Upload to Supabase Storage
-  if (portrait_file && portrait_file.size > 0 && portrait_file.name !== 'undefined') {
-    portrait_changed = true;
-    
-    // (A) Upload unique filename to Supabase Storage
-    const fileName = `covers/${id}/portrait_${uuidv4()}.jpg`; // Unique path
-    const { data: uploadData, error: uploadError } = await supabase.storage
+  // ── Upload new cover image if provided
+  if (cover_file && cover_file.size > 0 && cover_file.name !== 'undefined') {
+    const fileName = `covers/${id}/cover_${uuidv4()}.jpg`;
+    const { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
-      .upload(fileName, portrait_file, {
-        cacheControl: '3600',
-        upsert: false // We create a unique name
-      });
+      .upload(fileName, cover_file, { cacheControl: '3600', upsert: false });
 
-    if (uploadError) {
-      throw new Error(`Failed to upload portrait to storage: ${uploadError.message}`);
-    }
+    if (uploadError) throw new Error(`Failed to upload cover: ${uploadError.message}`);
 
-    // (B) Construct the new final URL
-    final_image_url = `${PUBLIC_BASE_URL}${fileName}`;
+    cover_image_url = `${PUBLIC_BASE_URL}${fileName}`;
+    new_image_uploaded = true;
   }
 
-  // -- 1b. Update or Insert Database Record
-  const bookData = {
-    id, title, slug, amazon_url, badge, display_order, status,
-    cover_image_url: final_image_url, // Update with new URL or maintain old
-    updated_at: new Date().toISOString()
-  };
+  // ── If setting as featured, unset all others first
+  if (is_featured) {
+    await supabase.from('books').update({ is_featured: false }).neq('id', id);
+  }
 
-  const { error: upsertError } = await supabase
-    .from('books')
-    .upsert(bookData);
+  // ── Upsert book record
+  const { error: upsertError } = await supabase.from('books').upsert({
+    id, title, slug, amazon_url, blurb, full_description,
+    topic_id, badge, display_order, status, is_featured,
+    cover_image_url,
+    related_book_ids,
+    updated_at: new Date().toISOString(),
+  });
 
   if (upsertError) {
-    // (C) CLEANUP: If DB update fails, delete the orphaned image if we uploaded one
-    if (portrait_changed && final_image_url !== old_image_url) {
-        const fileToDelete = final_image_url.replace(PUBLIC_BASE_URL, '');
-        await supabase.storage.from(BUCKET_NAME).remove([fileToDelete]);
-    }
-    throw new Error(`Failed to save book to database: ${upsertError.message}`);
+    // Cleanup orphaned upload on DB failure
+    if (new_image_uploaded) await deleteImageFromStorage(supabase, cover_image_url);
+    throw new Error(`Failed to save book: ${upsertError.message}`);
   }
 
-  // -- 1c. CLEANUP: If edit and portrait changed, delete the old image
-  if (portrait_changed && old_image_url) {
-    const fileToDelete = old_image_url.replace(PUBLIC_BASE_URL, '');
-    await supabase.storage.from(BUCKET_NAME).remove([fileToDelete]);
+  // ── Cleanup old image if replaced
+  if (new_image_uploaded && old_image_url) {
+    await deleteImageFromStorage(supabase, old_image_url);
   }
 
   revalidatePath('/admin/books');
   revalidatePath('/books');
   revalidatePath(`/books/${slug}`);
+  revalidatePath('/');
   redirect('/admin/books');
 }
 
+export async function deleteBook(id: string, image_url: string | null) {
+  const supabase = await requireAuth();
 
-// 2. Core Action: Delete a Book entry (with cascading image deletion)
-export async function deleteBook(id: string, image_url: string) {
-  const supabase = await createClient();
+  // Delete DB record first
+  const { error } = await supabase.from('books').delete().eq('id', id);
+  if (error) throw new Error(`Failed to delete book: ${error.message}`);
 
-  // (Server-side Auth Check)
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    throw new Error('Unauthorized.');
-  }
+  // Then cleanup storage — no ghost files
+  await deleteImageFromStorage(supabase, image_url);
 
-  // -- 2a. Delete Database Record
-  const { error: deleteError } = await supabase
-    .from('books')
-    .delete()
-    .eq('id', id);
+  revalidatePath('/admin/books');
+  revalidatePath('/books');
+  revalidatePath('/');
+}
 
-  if (deleteError) {
-    throw new Error(`Failed to delete book from database: ${deleteError.message}`);
-  }
+export async function setFeaturedBook(id: string) {
+  const supabase = await requireAuth();
 
-  // -- 2b. Cascading Image Deletion: Delete the object from Storage
-  if (image_url && image_url.startsWith(PUBLIC_BASE_URL)) {
-    const fileToDelete = image_url.replace(PUBLIC_BASE_URL, '');
-    await supabase.storage.from(BUCKET_NAME).remove([fileToDelete]);
-  }
+  await supabase.from('books').update({ is_featured: false }).neq('id', '00000000-0000-0000-0000-000000000000');
+  const { error } = await supabase.from('books').update({ is_featured: true }).eq('id', id);
+  if (error) throw new Error(`Failed to set featured: ${error.message}`);
+
+  revalidatePath('/admin/books');
+  revalidatePath('/books');
+  revalidatePath('/');
+}
+
+// ── TOPIC ACTIONS ─────────────────────────────────────────────────────────────
+
+export async function upsertTopic(prevState: any, formData: FormData) {
+  const supabase = await requireAuth();
+
+  const id = (formData.get('id') as string) || uuidv4();
+  const name = formData.get('name') as string;
+  const display_order = parseInt(formData.get('display_order') as string) || 0;
+
+  const { error } = await supabase.from('book_topics').upsert({ id, name, display_order });
+  if (error) throw new Error(`Failed to save topic: ${error.message}`);
+
+  revalidatePath('/admin/books');
+  revalidatePath('/books');
+}
+
+export async function deleteTopic(id: string) {
+  const supabase = await requireAuth();
+
+  const { error } = await supabase.from('book_topics').delete().eq('id', id);
+  if (error) throw new Error(`Failed to delete topic: ${error.message}`);
 
   revalidatePath('/admin/books');
   revalidatePath('/books');
